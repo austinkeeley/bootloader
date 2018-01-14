@@ -1,2 +1,4 @@
 disk.img
-bootloader
+*.elf
+*.o
+.gdb_history
