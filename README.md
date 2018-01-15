@@ -1,21 +1,18 @@
 bootloader
 ===========
 
-A simple bootloader that runs on qemu-system-i386.
+A simple bootloader that runs on qemu-system-i386, inspired from
+the project  https://tuhdo.github.io/os01/
 
-From the project at https://tuhdo.github.io/os01/
+Building and running:
 
     make
     make qemu
 
 
-Start gdb
+To debug:
 
-    (gdb) set architecture i8086
-    (gdb) target remote localhost:26000
-    (gdb) b *0x7c00
-    (gdb) layout asm
-    (gdb) layout reg
-    (gdb) c
+    make qemu-dbg   # QEMU will pause and wait for the debugger to attach
+    gdb -ix gdb-settings.txt bootloader.elf
 
-Use `stepi` to step through the bootloader.
+
