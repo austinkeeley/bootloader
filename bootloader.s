@@ -6,8 +6,9 @@ start:
 boot:
   cli   ; no interrupts
   cld
-  push banner
-  call _print
+  mov  ax, banner
+  call _print_str
+
   hlt
 
 ; Get the current cursor position
@@ -18,51 +19,54 @@ _get_cursor:
   xor bh, bh    ; set page to 0
   int 0x10
   ret
+
+; Advances the cursor one space
+_advance_cursor:
+  call _get_cursor
+  add dl, 1
+  mov ah, 0x2
+  int 0x10
+  ret
+
+; Prints a single character and advances the cursor
+; Params
+;   al - Contains the value to print
+_print_char:
+  mov ah, 0x0A ; function to print a character
+  mov bh, 0x0  ; page 0
+  mov cx, 1    ; print one time
+  int 0x10     ; print the character
+
+  call _get_cursor
+  add dl, 1    ; add 1 to the column 
+  mov ah, 0x2  ; function to move cursor
+  int 0x10     ; move the cursor
+  ret
+  
+  
   
 ; Prints a string. Only in green. 
 ; Paramters:
-;  cx - Address of the string
-_print:
-  ;set up the frame
-  push bp
-  mov bp, sp
-  sub sp, 4
+;  ax - Address of the string
+_print_str:
 
-  call _get_cursor  ; Get the cursor's current position, then add 1 to the row
-  add dh, 0x1
-  mov bp, ax
-  xor ax, ax
-  mov  es, ax
-  xor bh, bh
-  ;mov bp, banner
-  mov bp, banner
+  mov si, ax     ; set up our index
+ 
+  _iteration: 
+    mov bx, [si]
+    cmp bx, 0x0  ; are we at the end?
+    jz _loop_done
 
-  mov ah, 0x13   ; we want to print a string
-  mov bl, 0xa
-  mov al, 0x1    ; write mode
-  mov cx, [banner_len]    ; message length
-  int 0x10
-  
-  mov sp, bp
-  pop bp
+    mov ax, bx
+    call _print_char
+    add si, 1
+  jmp  _iteration
 
+  _loop_done:
   ret
-   
-
-
-
-  ;mov ah, 9  ; Write instruction for int 0x10
-  ;mov al, 64 ; A
-  ;mov bh, 0  ; Page number
-  ;mov bl, 4  ; Red on black (00000100 - High 0000 is black, low 0100 is red)
-  ;mov cx, 1  ; Writes one character
-  ;int 0x10
-
-
+  
 banner:
-  dw "Hello, Bootloader!"
-banner_len:
-  dw $-banner
+  dw "Hello, Bootloader!", 0
 
 times 510 - ($-$$) db 0
 dw 0xaa55 ; boot signature
