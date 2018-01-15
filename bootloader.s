@@ -29,12 +29,15 @@ _advance_cursor:
   ret
 
 ; Prints a single character and advances the cursor
+; Only prints green
 ; Params
 ;   al - Contains the value to print
 _print_char:
-  mov ah, 0x0A ; function to print a character
+  mov ah, 0x09 ; function to print a character
   mov bh, 0x0  ; page 0
   mov cx, 1    ; print one time
+  mov bl, 0xa  ; Green foreground
+
   int 0x10     ; print the character
 
   call _get_cursor
@@ -45,7 +48,7 @@ _print_char:
   
   
   
-; Prints a string. Only in green. 
+; Prints a string. 
 ; Paramters:
 ;  ax - Address of the string
 _print_str:
